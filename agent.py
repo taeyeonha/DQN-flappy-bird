@@ -7,11 +7,24 @@ import gymnasium
 from dqn import DQN
 from experience_replay import ReplayMemory
 import itertools
+import yaml
 
 print('GPU Available:', torch.cuda.is_available())
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 class Agent:
+    def __init__(self, hyperparameter_set):
+        with open('hyperparameters.yml', 'r') as file:
+            all_hyperparameter_sets = yaml.safe_load(file)
+            hyperparameters = all_hyperparameter_sets[hyperparameter_set]
+
+        self.replay_memory_size = hyperparameters['replay_memory_size']  # size of replay memory
+        self.mini_batch_size    = hyperparameters['mini_batch_size']     # size of the training data set sampled from the replay memory
+        self.epsilon_init       = hyperparameters['epsilon_init']        # 1 = 100% random actions
+        self.epsilon_decay      = hyperparameters['epsilon_decay']       # epsilon decay rate
+        self.epsilon_min        = hyperparameters['epsilon_min']         # minimum epsilon value
+
+
     def run(self, is_training=True, render=False):
         # env = gymnasium.make("FlappyBird-v0", render_mode="human" if render else None, use_lidar=False)
         env = gymnasium.make("CartPole-v1", render_mode="human" if render else None)
