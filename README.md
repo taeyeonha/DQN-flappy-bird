@@ -6,3 +6,4 @@ roadmap:
 - implement dqn with pytorch
 - implement experience replay (this allows the algorithm to store past "experiences" in a memory buffer and learn from random mini-batches from these memories rather than only its most recent action. this can be done using a python deque)
 - add hyperparameters
+- implement epsilon-greedy
