@@ -5,6 +5,8 @@ import torch
 import flappy_bird_gymnasium
 import gymnasium
 from dqn import DQN
+from experience_replay import ReplayMemory
+import itertools
 
 print('GPU Available:', torch.cuda.is_available())
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -17,19 +19,33 @@ class Agent:
         num_states = env.observation_space.shape[0]
         num_actions = env.actions_space.n
 
+        rewards_per_episode = []
+
         policy_dqn = DQN(num_states, num_actions).to_device(device)
 
-        obs, _ = env.reset()
-        while True:
-            # Next action:
-            # (feed the observation to your agent here)
-            action = env.action_space.sample()
+        if is_training:
+            memory = ReplayMemory(10000)
 
-            # Processing:
-            obs, reward, terminated, _, info = env.step(action)
-            
-            # Checking if the player is still alive
-            if terminated:
-                break
+        for episode in itertools.count():
+            state, _ = env.reset()
+            terminated = False
+            episode_reward = 0.0
 
-        env.close()
+            while not terminated:
+                # Next action:
+                # (feed the observation to your agent here)
+                action = env.action_space.sample()
+
+                # Processing:
+                new_state, reward, terminated, _, info = env.step(action)
+
+                # accumulate reward
+                episode_reward += reward
+
+                if is_training:
+                    memory.append((state, action, new_state, reward, terminated))
+
+                # Move to new state
+                state = new_state
+
+            rewards_per_episode.append(episode_reward)
